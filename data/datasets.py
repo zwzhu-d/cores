@@ -29,7 +29,7 @@ test_cifar100_transform = transforms.Compose([
 def input_dataset(dataset, noise_type, noise_ratio):
     if dataset == 'cifar10':
         train_dataset = CIFAR10(root='./data/',
-                                download=False,  
+                                download=True,  
                                 train=True, 
                                 transform = train_cifar10_transform,
                                 noise_type=noise_type,
