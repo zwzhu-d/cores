@@ -36,7 +36,7 @@ def input_dataset(dataset, noise_type, noise_ratio):
                                 noise_rate=noise_ratio
                            )
         test_dataset = CIFAR10(root='./data/',
-                                download=False,  
+                                download=True,  
                                 train=False, 
                                 transform = test_cifar10_transform,
                                 noise_type=noise_type,
