@@ -55,8 +55,8 @@ def loss_cores(epoch, y, t,class_list, ind, noise_or_not,loss_all,loss_div_all, 
 
 def f_beta(epoch):
     beta1 = np.linspace(0.0, 0.0, num=10)
-    beta2 = np.linspace(0.0, 2, num=30)
-    beta3 = np.linspace(2, 2, num=60)
+    beta2 = np.linspace(0.0, 3.0, num=30)
+    beta3 = np.linspace(3.0, 3.0, num=60)
  
     beta = np.concatenate((beta1,beta2,beta3),axis=0) 
     return beta[epoch]
