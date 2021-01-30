@@ -101,8 +101,11 @@ class CIFAR10(data.Dataset):
                     print(f'The noisy data ratio in each class is {self.noise_prior}')
                     self.noise_or_not = np.transpose(self.train_noisy_labels)!=np.transpose(_train_labels)
                 else:
-                    self.train_noisy_labels, self.actual_noise_rate = noisify_instance(self.train_data, self.train_labels,noise_rate=noise_rate)
-                    print('over all noise rate is ', self.actual_noise_rate)
+                    train_noisy_labels = self.load_label()
+                    self.train_noisy_labels = train_noisy_labels.numpy().tolist()
+                    print(f'noisy labels loaded from {self.noise_type}')
+                    # self.train_noisy_labels, self.actual_noise_rate = noisify_instance(self.train_data, self.train_labels,noise_rate=noise_rate)
+                    # print('over all noise rate is ', self.actual_noise_rate)
                     #self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
                     #self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
                     #_train_labels=[i[0] for i in self.train_labels]
@@ -129,6 +132,23 @@ class CIFAR10(data.Dataset):
             self.test_data = self.test_data.reshape((10000, 3, 32, 32))
             self.test_data = self.test_data.transpose((0, 2, 3, 1))  # convert to HWC
 
+
+    def load_label(self):
+        '''
+        I adopt .pt rather .pth according to this discussion:
+        https://github.com/pytorch/pytorch/issues/14864
+        '''
+        #NOTE presently only use for load manual training label
+        # noise_label = torch.load(self.noise_type)   # f'../../{self.noise_type}'
+        noise_label = torch.load(f'noise_label/cifar-10/{self.noise_type}')
+        if isinstance(noise_label, dict):
+            if "clean_label_train" in noise_label.keys():
+                clean_label = noise_label['clean_label_train']
+                assert torch.sum(torch.tensor(self.train_labels) - clean_label) == 0  # commented for noise identification (NID) since we need to replace labels
+            return noise_label['noise_label_train'].view(-1).long() # % 10
+        else:
+            return noise_label.view(-1).long()  # % 10
+            
     def __getitem__(self, index):
         """
         Args:
