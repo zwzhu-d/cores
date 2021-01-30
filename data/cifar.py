@@ -89,6 +89,7 @@ class CIFAR10(data.Dataset):
             #if noise_type is not None:
             if noise_type !='clean':
                 # noisify train data
+                print(f'noise_type')
                 if noise_type in ['pairflip', 'symmetric']:
                     self.train_labels=np.asarray([[self.train_labels[i]] for i in range(len(self.train_labels))])
                     self.train_noisy_labels, self.actual_noise_rate = noisify(dataset=self.dataset, train_labels=self.train_labels, noise_type=noise_type, noise_rate=noise_rate, random_state=random_state, nb_classes=self.nb_classes)
