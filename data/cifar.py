@@ -140,7 +140,7 @@ class CIFAR10(data.Dataset):
         '''
         #NOTE presently only use for load manual training label
         # noise_label = torch.load(self.noise_type)   # f'../../{self.noise_type}'
-        noise_label = torch.load(f'noise_label/cifar-10/{self.noise_type}')
+        noise_label = torch.load(f'{self.noise_type}')
         if isinstance(noise_label, dict):
             if "clean_label_train" in noise_label.keys():
                 clean_label = noise_label['clean_label_train']
@@ -148,7 +148,7 @@ class CIFAR10(data.Dataset):
             return noise_label['noise_label_train'].view(-1).long() # % 10
         else:
             return noise_label.view(-1).long()  # % 10
-            
+
     def __getitem__(self, index):
         """
         Args:
