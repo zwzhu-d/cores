@@ -104,7 +104,7 @@ class CIFAR10(data.Dataset):
                     # import pdb
                     # pdb.set_trace()
                     torch.save({'clean_label': _train_labels, 'noise_label_train':self.train_noisy_labels},f'{noise_type}_{noise_rate}.pt')
-                    # exit()
+                    exit()
                 else:
                     train_noisy_labels = self.load_label()
                     self.train_noisy_labels = train_noisy_labels.numpy().tolist()
