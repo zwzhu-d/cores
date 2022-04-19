@@ -101,8 +101,10 @@ class CIFAR10(data.Dataset):
                     self.noise_prior = np.array(class_size_noisy)/sum(class_size_noisy)
                     print(f'The noisy data ratio in each class is {self.noise_prior}')
                     self.noise_or_not = np.transpose(self.train_noisy_labels)!=np.transpose(_train_labels)
-                    import pdb
-                    pdb.set_trace()
+                    # import pdb
+                    # pdb.set_trace()
+                    torch.save({'clean_label': _train_labels, 'noise_label_train':self.train_noisy_labels},f'{noise_type}_{noise_rate}.pt')
+                    # exit()
                 else:
                     train_noisy_labels = self.load_label()
                     self.train_noisy_labels = train_noisy_labels.numpy().tolist()
