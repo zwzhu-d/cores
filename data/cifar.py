@@ -101,6 +101,7 @@ class CIFAR10(data.Dataset):
                     self.noise_prior = np.array(class_size_noisy)/sum(class_size_noisy)
                     print(f'The noisy data ratio in each class is {self.noise_prior}')
                     self.noise_or_not = np.transpose(self.train_noisy_labels)!=np.transpose(_train_labels)
+                    self.train_labels = _train_labels
                     # import pdb
                     # pdb.set_trace()
                     
