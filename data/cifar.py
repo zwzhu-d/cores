@@ -121,6 +121,7 @@ class CIFAR10(data.Dataset):
                 
                 elif noise_type == 'uniform':
                     self.train_noisy_labels, self.actual_noise_rate = noisify_uniform(self.train_labels,noise_rate=noise_rate, random_state=random_state)
+                    self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
 
                 else:
                     train_noisy_labels = self.load_label()
