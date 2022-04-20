@@ -26,14 +26,14 @@ test_cifar100_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
 ])
-def input_dataset(dataset, noise_type, noise_ratio):
+def input_dataset(dataset, noise_type, noise_ratio, seed = 0):
     if dataset == 'cifar10':
         train_dataset = CIFAR10(root='./data/',
                                 download=True,  
                                 train=True, 
                                 transform = train_cifar10_transform,
                                 noise_type=noise_type,
-                                noise_rate=noise_ratio
+                                noise_rate=noise_ratio, random_state = seed
                            )
         test_dataset = CIFAR10(root='./data/',
                                 download=True,  

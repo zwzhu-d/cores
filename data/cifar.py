@@ -120,7 +120,7 @@ class CIFAR10(data.Dataset):
                     self.noise_or_not = np.transpose(self.train_noisy_labels)!=np.transpose(self.train_labels)
                 
                 elif noise_type == 'uniform':
-                    self.train_noisy_labels, self.actual_noise_rate = noisify_uniform(self.train_data, self.train_labels,noise_rate=noise_rate)
+                    self.train_noisy_labels, self.actual_noise_rate = noisify_uniform(self.train_labels,noise_rate=noise_rate, random_state=random_state)
 
                 else:
                     train_noisy_labels = self.load_label()
