@@ -182,6 +182,35 @@ def noisify(dataset='mnist', nb_classes=10, train_labels=None, noise_type=None, 
 
 
 
+# def noisify_instance(train_data,train_labels,noise_rate):
+#     if max(train_labels)>10:
+#         num_class = 100
+#     else:
+#         num_class = 10
+#     np.random.seed(0)
+
+#     q_ = np.random.normal(loc=noise_rate,scale=0.1,size=1000000)
+#     q = []
+#     for pro in q_:
+#         if 0 < pro < 1:
+#             q.append(pro)
+#         if len(q)==50000:
+#             break
+
+#     w = np.random.normal(loc=0,scale=1,size=(32*32*3,num_class))
+
+#     noisy_labels = []
+#     for i, sample in enumerate(train_data):
+#         sample = sample.flatten()
+#         p_all = np.matmul(sample,w)
+#         p_all[train_labels[i]] = -1000000
+#         p_all = q[i]* F.softmax(torch.tensor(p_all),dim=0).numpy()
+#         p_all[train_labels[i]] = 1 - q[i]
+#         noisy_labels.append(np.random.choice(np.arange(num_class),p=p_all/sum(p_all)))
+#     over_all_noise_rate = 1 - float(torch.tensor(train_labels).eq(torch.tensor(noisy_labels)).sum())/50000
+#     return noisy_labels, over_all_noise_rate
+
+
 def noisify_instance(train_data,train_labels,noise_rate):
     if max(train_labels)>10:
         num_class = 100
@@ -196,16 +225,52 @@ def noisify_instance(train_data,train_labels,noise_rate):
             q.append(pro)
         if len(q)==50000:
             break
-
-    w = np.random.normal(loc=0,scale=1,size=(32*32*3,num_class))
+    
+    w = []
+    for i in range(num_class):
+        w.append(np.random.normal(loc=0,scale=1,size=(32*32*3,num_class)))
 
     noisy_labels = []
+    T = np.zeros((num_class,num_class))
     for i, sample in enumerate(train_data):
         sample = sample.flatten()
-        p_all = np.matmul(sample,w)
+        p_all = np.matmul(sample,w[train_labels[i]])
         p_all[train_labels[i]] = -1000000
         p_all = q[i]* F.softmax(torch.tensor(p_all),dim=0).numpy()
         p_all[train_labels[i]] = 1 - q[i]
         noisy_labels.append(np.random.choice(np.arange(num_class),p=p_all/sum(p_all)))
+        T[train_labels[i]][noisy_labels[i]] += 1
     over_all_noise_rate = 1 - float(torch.tensor(train_labels).eq(torch.tensor(noisy_labels)).sum())/50000
+    T = T/np.sum(T,axis=1)
+    print(np.round(T*100,1))
     return noisy_labels, over_all_noise_rate
+
+
+
+def noisify_uniform(train_labels,noise_rate, random_state = 0):
+    if max(train_labels)>10:
+        num_class = 100
+    else:
+        num_class = 10
+
+    e_k = np.random.dirichlet(np.ones(num_class)) * noise_rate
+    # print(e_k)
+    # print(np.sum(e_k))
+    # exit()
+    # e_k = [0.1,0.05,0.04,0.15, 0.08]
+    # num_class = len(e_k)
+
+    T = np.zeros((num_class,num_class))
+    for i in range(num_class):
+        for j in range(num_class):
+            if i != j:
+                T[i][j] = e_k[j]
+        T[i][i] = 1 - np.sum(T[i])
+    y_train_noisy = multiclass_noisify(y_train, P=T,
+                                           random_state=random_state)
+    actual_noise = (y_train_noisy != y_train).mean()
+    assert actual_noise > 0.0
+    print('Actual noise %.2f' % actual_noise)
+    y_train = y_train_noisy
+    print(np.round(T*100,1))
+    return y_train, actual_noise

@@ -152,79 +152,86 @@ args = parser.parse_args()
 # Seed
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
-
+np.random.seed(args.seed)
+# random.seed(args.seed)
 # Hyper Parameters
 batch_size = 64
 learning_rate = args.lr 
 
 # load dataset
-train_dataset,test_dataset,num_classes,num_training_samples = input_dataset(args.dataset,args.noise_type,args.noise_rate)
-noise_prior = train_dataset.noise_prior
-noise_or_not = train_dataset.noise_or_not
-print('train_labels:', len(train_dataset.train_labels), train_dataset.train_labels[:10])
-# load model
-print('building model...')
-if args.model == 'cnn':
-    model = CNN(input_channel=3, n_outputs=num_classes)
-else:
-    model = ResNet34(num_classes)
-print('building model done')
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-# Creat loss and loss_div for each sample at each epoch
-loss_all = np.zeros((num_training_samples,args.n_epoch))
-loss_div_all = np.zeros((num_training_samples,args.n_epoch))
-### save result and model checkpoint #######   
-save_dir = args.result_dir +'/' +args.dataset + '/' + args.model 
-if not os.path.exists(save_dir):
-    os.system('mkdir -p %s' % save_dir)
-train_loader = torch.utils.data.DataLoader(dataset = train_dataset,
-                                   batch_size = batch_size, 
-                                   num_workers=args.num_workers,
-                                   shuffle=True)
+for args.noise_rate in np.linspace(0.05,0.6,30):
+    train_dataset,test_dataset,num_classes,num_training_samples = input_dataset(args.dataset,args.noise_type,args.noise_rate)
+    torch.save({'clean_label': train_dataset._train_labels, 'noise_label_train':train_dataset.train_noisy_labels},f'{args.noise_type}_{args.noise_rate}.pt')
+    print(f'data saved to {args.noise_type}_{args.noise_rate}.pt')
 
-test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                  batch_size = 64, 
-                                  num_workers=args.num_workers,
-                                  shuffle=False)
-alpha_plan = [0.1] * 50 + [0.01] * 50 
-#alpha_plan = []
-#for ii in range(args.n_epoch):
-#    alpha_plan.append(learning_rate*pow(0.95,ii))
-model.cuda()
-txtfile=save_dir + '/' +  args.loss + args.noise_type + str(args.noise_rate) + '.txt' 
-if os.path.exists(txtfile):
-    os.system('rm %s' % txtfile)
-with open(txtfile, "a") as myfile:
-    myfile.write('epoch: train_acc test_acc \n')
 
-epoch=0
-train_acc = 0
-best_acc_ = 0.0
-#print(best_acc_)
-# training
-noise_prior_cur = noise_prior
-for epoch in range(args.n_epoch):
-# train models
-    adjust_learning_rate(optimizer, epoch, alpha_plan)
-    model.train()
-    train_acc, noise_prior_delta = train(epoch,num_classes,train_loader, model, optimizer,loss_all,loss_div_all,args.loss,noise_prior = noise_prior_cur)
-    noise_prior_cur = noise_prior*num_training_samples - noise_prior_delta
-    noise_prior_cur = noise_prior_cur/sum(noise_prior_cur)
-# evaluate models
-    test_acc, best_acc_ = evaluate(test_loader=test_loader, save=True, model=model,epoch=epoch,best_acc_=best_acc_,args=args)
-# save results
-    #det_by_loss  = det_acc(save_dir,best_ratio,args,loss_all,noise_or_not,epoch,sum_epoch = False)
-    #det_by_loss_div = det_acc(save_dir,best_ratio,args,loss_div_all,noise_or_not,epoch,sum_epoch = False)
-    print('train acc on train images is ', train_acc)
-    print('test acc on test images is ', test_acc)
-    #print('precision of labels by loss is', det_by_loss)
-    #print('precision of labels by loss div is', det_by_loss_div)
-    with open(txtfile, "a") as myfile:
-        myfile.write(str(int(epoch)) + ': '  + str(train_acc) +' ' + str(test_acc) + "\n")
-    np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'loss_all.npy',loss_all)
-    np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'loss_div_all.npy',loss_div_all)
-    np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'noise_or_not.npy',noise_or_not)
-    np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'train_noisy_labels.npy',train_dataset.train_noisy_labels)
-    if epoch ==40:
-        idx_last = get_noise_pred(loss_div_all, args, epoch=epoch)
-        np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'_noise_pred.npy',idx_last)
+
+# noise_prior = train_dataset.noise_prior
+# noise_or_not = train_dataset.noise_or_not
+# print('train_labels:', len(train_dataset.train_labels), train_dataset.train_labels[:10])
+# # load model
+# print('building model...')
+# if args.model == 'cnn':
+#     model = CNN(input_channel=3, n_outputs=num_classes)
+# else:
+#     model = ResNet34(num_classes)
+# print('building model done')
+# optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+# # Creat loss and loss_div for each sample at each epoch
+# loss_all = np.zeros((num_training_samples,args.n_epoch))
+# loss_div_all = np.zeros((num_training_samples,args.n_epoch))
+# ### save result and model checkpoint #######   
+# save_dir = args.result_dir +'/' +args.dataset + '/' + args.model 
+# if not os.path.exists(save_dir):
+#     os.system('mkdir -p %s' % save_dir)
+# train_loader = torch.utils.data.DataLoader(dataset = train_dataset,
+#                                    batch_size = batch_size, 
+#                                    num_workers=args.num_workers,
+#                                    shuffle=True)
+
+# test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
+#                                   batch_size = 64, 
+#                                   num_workers=args.num_workers,
+#                                   shuffle=False)
+# alpha_plan = [0.1] * 50 + [0.01] * 50 
+# #alpha_plan = []
+# #for ii in range(args.n_epoch):
+# #    alpha_plan.append(learning_rate*pow(0.95,ii))
+# model.cuda()
+# txtfile=save_dir + '/' +  args.loss + args.noise_type + str(args.noise_rate) + '.txt' 
+# if os.path.exists(txtfile):
+#     os.system('rm %s' % txtfile)
+# with open(txtfile, "a") as myfile:
+#     myfile.write('epoch: train_acc test_acc \n')
+
+# epoch=0
+# train_acc = 0
+# best_acc_ = 0.0
+# #print(best_acc_)
+# # training
+# noise_prior_cur = noise_prior
+# for epoch in range(args.n_epoch):
+# # train models
+#     adjust_learning_rate(optimizer, epoch, alpha_plan)
+#     model.train()
+#     train_acc, noise_prior_delta = train(epoch,num_classes,train_loader, model, optimizer,loss_all,loss_div_all,args.loss,noise_prior = noise_prior_cur)
+#     noise_prior_cur = noise_prior*num_training_samples - noise_prior_delta
+#     noise_prior_cur = noise_prior_cur/sum(noise_prior_cur)
+# # evaluate models
+#     test_acc, best_acc_ = evaluate(test_loader=test_loader, save=True, model=model,epoch=epoch,best_acc_=best_acc_,args=args)
+# # save results
+#     #det_by_loss  = det_acc(save_dir,best_ratio,args,loss_all,noise_or_not,epoch,sum_epoch = False)
+#     #det_by_loss_div = det_acc(save_dir,best_ratio,args,loss_div_all,noise_or_not,epoch,sum_epoch = False)
+#     print('train acc on train images is ', train_acc)
+#     print('test acc on test images is ', test_acc)
+#     #print('precision of labels by loss is', det_by_loss)
+#     #print('precision of labels by loss div is', det_by_loss_div)
+#     with open(txtfile, "a") as myfile:
+#         myfile.write(str(int(epoch)) + ': '  + str(train_acc) +' ' + str(test_acc) + "\n")
+#     np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'loss_all.npy',loss_all)
+#     np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'loss_div_all.npy',loss_div_all)
+#     np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'noise_or_not.npy',noise_or_not)
+#     np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'train_noisy_labels.npy',train_dataset.train_noisy_labels)
+#     if epoch ==40:
+#         idx_last = get_noise_pred(loss_div_all, args, epoch=epoch)
+#         np.save(save_dir + '/' + args.loss + args.noise_type + str(args.noise_rate)+'_noise_pred.npy',idx_last)

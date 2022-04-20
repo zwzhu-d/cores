@@ -10,7 +10,7 @@ else:
     import pickle
 import torch
 import torch.utils.data as data
-from .utils import download_url, check_integrity, noisify, noisify_instance
+from .utils import download_url, check_integrity, noisify, noisify_instance, noisify_uniform
 
 class CIFAR10(data.Dataset):
     """`CIFAR10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
@@ -103,8 +103,24 @@ class CIFAR10(data.Dataset):
                     self.noise_or_not = np.transpose(self.train_noisy_labels)!=np.transpose(_train_labels)
                     # import pdb
                     # pdb.set_trace()
-                    torch.save({'clean_label': _train_labels, 'noise_label_train':self.train_noisy_labels},f'{noise_type}_{noise_rate}.pt')
-                    exit()
+                    
+                    # exit()
+                elif noise_type == 'instance':
+                    self.train_noisy_labels, self.actual_noise_rate = noisify_instance(self.train_data, self.train_labels,noise_rate=noise_rate)
+                    print('over all noise rate is ', self.actual_noise_rate)
+                    #self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
+                    #self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
+                    #_train_labels=[i[0] for i in self.train_labels]
+                    for i in range(len(self.train_labels)):
+                        idx_each_class_noisy[self.train_noisy_labels[i]].append(i)
+                    class_size_noisy = [len(idx_each_class_noisy[i]) for i in range(10)]
+                    self.noise_prior = np.array(class_size_noisy)/sum(class_size_noisy)
+                    print(f'The noisy data ratio in each class is {self.noise_prior}')
+                    self.noise_or_not = np.transpose(self.train_noisy_labels)!=np.transpose(self.train_labels)
+                
+                elif noise_type == 'uniform':
+                    self.train_noisy_labels, self.actual_noise_rate = noisify_uniform(self.train_data, self.train_labels,noise_rate=noise_rate)
+
                 else:
                     train_noisy_labels = self.load_label()
                     self.train_noisy_labels = train_noisy_labels.numpy().tolist()
