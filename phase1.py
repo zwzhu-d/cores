@@ -161,8 +161,8 @@ learning_rate = args.lr
 # load dataset
 for args.noise_rate in np.linspace(0.05,0.6,30):
     train_dataset,test_dataset,num_classes,num_training_samples = input_dataset(args.dataset,args.noise_type,args.noise_rate)
-    torch.save({'clean_label': train_dataset.train_labels, 'noise_label_train':train_dataset.train_noisy_labels},f'{args.noise_type}_{args.noise_rate}.pt')
-    print(f'data saved to {args.noise_type}_{args.noise_rate}.pt')
+    torch.save({'clean_label': train_dataset.train_labels, 'noise_label_train':train_dataset.train_noisy_labels},f'./noise/{args.noise_type}_{args.noise_rate}.pt')
+    print(f'data saved to ./noise/{args.noise_type}_{args.noise_rate}.pt')
 
 
 
