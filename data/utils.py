@@ -252,7 +252,7 @@ def noisify_uniform(train_labels,noise_rate, random_state = 0):
         num_class = 100
     else:
         num_class = 10
-    y_train = train_labels
+    y_train = np.array(train_labels)
     e_k = np.random.dirichlet(np.ones(num_class)) * noise_rate
     # print(e_k)
     # print(np.sum(e_k))
