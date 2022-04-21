@@ -142,7 +142,7 @@ def noisify_pairflip(y_train, noise, random_state=None, nb_classes=10):
                                            random_state=random_state)
         actual_noise = (y_train_noisy != y_train).mean()
         assert actual_noise > 0.0
-        print('Actual noise %.2f' % actual_noise)
+        print('Actual noise %.2f' % actual_noise, flush=True)
         y_train = y_train_noisy
     #print P
 
@@ -167,7 +167,7 @@ def noisify_multiclass_symmetric(y_train, noise, random_state=None, nb_classes=1
                                            random_state=random_state)
         actual_noise = (y_train_noisy != y_train).mean()
         assert actual_noise > 0.0
-        print('Actual noise %.2f' % actual_noise)
+        print('Actual noise %.2f' % actual_noise, flush=True)
         y_train = y_train_noisy
     #print P
 
@@ -242,7 +242,7 @@ def noisify_instance(train_data,train_labels,noise_rate):
         T[train_labels[i]][noisy_labels[i]] += 1
     over_all_noise_rate = 1 - float(torch.tensor(train_labels).eq(torch.tensor(noisy_labels)).sum())/50000
     T = T/np.sum(T,axis=1)
-    print(np.round(T*100,1))
+    print(np.round(T*100,1), flush=True)
     return noisy_labels, over_all_noise_rate
 
 
@@ -270,9 +270,9 @@ def noisify_uniform(train_labels,noise_rate, random_state = 0):
                                            random_state=random_state)
     actual_noise = (y_train_noisy != y_train).mean()
     assert actual_noise >= 0.0
-    print('Actual noise %.2f' % actual_noise)
+    print('Actual noise %.2f' % actual_noise, flush=True)
     y_train = y_train_noisy
-    print(np.round(T*100,1))
+    print(np.round(T*100,1), flush=True)
     return y_train, actual_noise
 
 
@@ -305,7 +305,7 @@ def noisify_general(train_labels,noise_rate, random_state = 0):
                                            random_state=random_state)
     actual_noise = (y_train_noisy != y_train).mean()
     assert actual_noise > 0.0
-    print('Actual noise %.2f' % actual_noise)
+    print('Actual noise %.2f' % actual_noise, flush=True)
     y_train = y_train_noisy
     print(np.round(T*100,1))
     return y_train, actual_noise
