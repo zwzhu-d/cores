@@ -131,7 +131,7 @@ def noisify_pairflip(y_train, noise, random_state=None, nb_classes=10):
     P = np.eye(nb_classes)
     n = noise
 
-    if n > 0.0:
+    if n >= 0.0:
         # 0 -> 1
         P[0, 0], P[0, 1] = 1. - n, n
         for i in range(1, nb_classes-1):
@@ -141,7 +141,7 @@ def noisify_pairflip(y_train, noise, random_state=None, nb_classes=10):
         y_train_noisy = multiclass_noisify(y_train, P=P,
                                            random_state=random_state)
         actual_noise = (y_train_noisy != y_train).mean()
-        assert actual_noise > 0.0
+        assert actual_noise >= 0.0
         print('Actual noise %.2f' % actual_noise, flush=True)
         y_train = y_train_noisy
     #print P
