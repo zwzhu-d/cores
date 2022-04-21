@@ -269,7 +269,7 @@ def noisify_uniform(train_labels,noise_rate, random_state = 0):
     y_train_noisy = multiclass_noisify(y_train, P=T,
                                            random_state=random_state)
     actual_noise = (y_train_noisy != y_train).mean()
-    assert actual_noise > 0.0
+    assert actual_noise >= 0.0
     print('Actual noise %.2f' % actual_noise)
     y_train = y_train_noisy
     print(np.round(T*100,1))
