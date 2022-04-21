@@ -298,7 +298,7 @@ def noisify_general(train_labels,noise_rate, random_state = 0):
     acc = 1-noise_rate
     std_acc = 0.05 if num_class > 2 else 0.01
     P_diag = acc + std_acc*2*(np.random.rand(num_class) - 0.5)
-
+    P_diag[P_diag>1.0] = 1.0
     T = generate_noise_matrix_from_diagonal(P_diag)
 
     y_train_noisy = multiclass_noisify(y_train, P=np.array(T),
