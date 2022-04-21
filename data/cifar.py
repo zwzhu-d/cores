@@ -10,7 +10,7 @@ else:
     import pickle
 import torch
 import torch.utils.data as data
-from .utils import download_url, check_integrity, noisify, noisify_instance, noisify_uniform
+from .utils import download_url, check_integrity, noisify, noisify_instance, noisify_uniform, noisify_general
 
 class CIFAR10(data.Dataset):
     """`CIFAR10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
@@ -121,6 +121,10 @@ class CIFAR10(data.Dataset):
                 
                 elif noise_type == 'uniform':
                     self.train_noisy_labels, self.actual_noise_rate = noisify_uniform(self.train_labels,noise_rate=noise_rate, random_state=random_state)
+                    self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
+                
+                elif noise_type == 'general':
+                    self.train_noisy_labels, self.actual_noise_rate = noisify_general(self.train_labels,noise_rate=noise_rate, random_state=random_state)
                     self.train_noisy_labels=[i[0] for i in self.train_noisy_labels]
 
                 else:

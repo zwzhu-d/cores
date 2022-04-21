@@ -274,3 +274,38 @@ def noisify_uniform(train_labels,noise_rate, random_state = 0):
     y_train = y_train_noisy
     print(np.round(T*100,1))
     return y_train, actual_noise
+
+
+def generate_noise_matrix_from_diagonal(diag):
+    K = diag.shape[0]
+    noise_matrix = np.zeros((K, K))
+    for i in range(diag.shape[0]):
+        noise_matrix[i, i] = diag[i]
+        # noise_matrix[np.arange(K)!=i, i] = np.random.dirichlet(np.ones(K-1)) * (1 - diag[i])  # this is different from the T generally defined in the literature
+        tmp = np.random.dirichlet(np.ones(K-1)) * (1 - diag[i])
+        while np.sum(tmp > 0.9*noise_matrix[i, i]) > 0:
+            tmp = np.random.dirichlet(np.ones(K-1)) * (1 - diag[i])
+        noise_matrix[i, np.arange(K)!=i] = tmp  # use this one
+    return noise_matrix
+
+def noisify_general(train_labels,noise_rate, random_state = 0):
+    if max(train_labels)>10:
+        num_class = 100
+    else:
+        num_class = 10
+    y_train = np.asarray([[train_labels[i]] for i in range(len(train_labels))])
+
+    acc = 1-noise_rate
+    std_acc = 0.05 if num_class > 2 else 0.01
+    P_diag = acc + std_acc*2*(np.random.rand(num_class) - 0.5)
+
+    T = generate_noise_matrix_from_diagonal(P_diag)
+
+    y_train_noisy = multiclass_noisify(y_train, P=np.array(T),
+                                           random_state=random_state)
+    actual_noise = (y_train_noisy != y_train).mean()
+    assert actual_noise > 0.0
+    print('Actual noise %.2f' % actual_noise)
+    y_train = y_train_noisy
+    print(np.round(T*100,1))
+    return y_train, actual_noise

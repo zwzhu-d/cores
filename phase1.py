@@ -159,11 +159,12 @@ batch_size = 64
 learning_rate = args.lr 
 
 # load dataset
-# for args.noise_rate in np.linspace(0.05,0.6,30):
-#     args.seed += 1
-train_dataset,test_dataset,num_classes,num_training_samples = input_dataset(args.dataset,args.noise_type,args.noise_rate, args.seed)
-torch.save({'clean_label': train_dataset.train_labels, 'noise_label_train':train_dataset.train_noisy_labels},f'./noise/{args.noise_type}_{args.noise_rate}.pt')
-print(f'data saved to ./noise/{args.noise_type}_{args.noise_rate}.pt')
+upper_bound = 0.4 if args.noise_type == 'pairflip' else 0.6
+for args.noise_rate in np.linspace(0.0,upper_bound,100):
+    args.seed += 1
+    train_dataset,test_dataset,num_classes,num_training_samples = input_dataset(args.dataset,args.noise_type,args.noise_rate, args.seed)
+    torch.save({'clean_label': train_dataset.train_labels, 'noise_label_train':train_dataset.train_noisy_labels},f'./noise/{args.noise_type}_{args.noise_rate}.pt')
+    print(f'data saved to ./noise/{args.noise_type}_{args.noise_rate}.pt')
 
 
 
